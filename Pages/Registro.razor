@@ -1,0 +1,175 @@
+﻿@page "/Registro"
+
+@using PrimerParcialAplicada2.Models;
+@using PrimerParcialAplicada2.Controllers;
+
+<div class="container">
+    <h3 class="display-4 text-center">Registro de Producto</h3>
+
+    <EditForm Model="Producto" OnValidSubmit="Guardar">
+
+
+        <div class="form-group">
+            <label>Id</label>
+            <InputNumber id="Id" @bind-Value="@Producto.ProductoId" class="form-control"></InputNumber>
+            <button class="btn btn-outline-primary mt-2" type="button" @onclick="Buscar">Buscar</button>
+        </div>
+
+        <div class="form-group">
+            <label>Fecha</label>
+            <InputDate id="Fecha" @bind-Value="@Producto.Fecha" class="form-control"></InputDate>
+        </div>
+
+        <div class="form-group">
+            <label>Descripcion</label>
+            <InputText id="Descripcion" @bind-Value="@Producto.Descripcion" class="form-control"></InputText>
+        </div>
+
+
+        <div class="form-group">
+            <label>Costo</label>
+            <InputNumber id="Costo" @bind-Value="@Producto.Costo" @oninput="Calculo" class="form-control"></InputNumber>
+        </div>
+
+        <div class="form-group">
+            <label>Porciento Ganancia</label>
+            <InputNumber id="Ganancia" @bind-Value="@Producto.Ganacia" @oninput="Calculo"class="form-control"></InputNumber>
+        </div>
+
+        <div class="form-group">
+            <label>Precio</label>
+            <InputNumber id="Precio" @bind-Value="@Producto.Precio" ReadOnly="true" class="form-control" ></InputNumber>
+        </div>
+        
+        
+        <p class="text-success">@Mensaje</p>
+
+        <div class="form-group">
+            <button class="btn btn-primary" type="button" @onclick="Limpiar">Limpiar</button>
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <button class="btn btn-danger" type="button" @onclick="Eliminar">Eliminar</button>
+
+
+        </div>
+
+    </EditForm>
+</div>
+
+@code {
+
+
+    public Productos Producto { get; set; }
+    public string Mensaje { get; set; }
+
+
+    protected override void OnInitialized()
+    {
+        Producto = new Productos();
+        Mensaje = string.Empty;
+    }
+
+
+    private void Limpiar()
+    {
+        Producto = new Productos();
+        Mensaje = string.Empty;
+    }
+
+    private void Buscar()
+    {
+        ProductosController db = new ProductosController();
+
+        try
+        {
+            Productos Temporal = null;
+            Temporal = db.Buscar(Producto.ProductoId);
+
+            if (Temporal != null)
+            {
+                Producto = Temporal;
+            }
+            else
+            {
+                Mensaje = "El Producto no se pudo encontrar";
+            }
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+    }
+
+    private void Guardar()
+    {
+        ProductosController db = new ProductosController();
+
+        try
+        {
+
+            if (Producto.ProductoId == 0)
+            {
+                if (db.Guardar(Producto))
+                {
+                    Producto = new Productos();
+                    Mensaje = "Producto guardado correctamente";
+                }
+                else
+                {
+                    Mensaje = "El Producto no se pudo guardar";
+                }
+            }
+            else
+            {
+                if (db.Modificar(Producto))
+                {
+                    Producto = new Productos();
+                    Mensaje = "El Producto fue modificado correctamente";
+                }
+                else
+                {
+                    Mensaje = "El producto no se pudo modificar";
+                }
+            }
+
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+    }
+
+    private void Eliminar()
+    {
+        ProductosController db = new ProductosController();
+
+        try
+        {
+            if (db.Eliminar(Producto.ProductoId))
+            {
+                Mensaje = "Producto eliminado Correctamente";
+                Producto = new Productos();
+            }
+            else
+            {
+                Mensaje = "El Producto no se pudo eliminar";
+            }
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+
+    }
+
+    private void Calculo()
+    {
+        Productos producto = new Productos();
+        Producto.Precio = (Producto.Costo * Producto.Ganacia) / 100;
+
+    }
+
+
+}
